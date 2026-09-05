@@ -1,0 +1,15 @@
+{
+    "name": "user/php-legado",
+    "autoload": {
+        "psr-4": {
+            "User\\PhpLegado\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "felipecarvalho-back",
+            "email": "felipedev.co@gmail.com"
+        }
+    ],
+    "require": {}
+}
