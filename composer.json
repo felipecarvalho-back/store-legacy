@@ -1,15 +1,26 @@
 {
-    "name": "user/php-legado",
-    "autoload": {
-        "psr-4": {
-            "User\\PhpLegado\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "felipecarvalho-back",
-            "email": "felipedev.co@gmail.com"
-        }
-    ],
-    "require": {}
+  "name": "user/php-legado",
+  "autoload": {
+    "psr-4": {
+      "User\\PhpLegado\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "felipecarvalho-back",
+      "email": "felipedev.co@gmail.com"
+    }
+  ],
+  "require": {
+    "slim/slim": "4.*",
+    "slim/http": "^1.4",
+    "slim/psr7": "^1.8",
+    "vlucas/phpdotenv": "^5.7"
+  },
+  "scripts": {
+    "start": "php -S localhost:8080 -t public"
+  },
+  "config": {
+    "process-timeout": 0
+  }
 }
