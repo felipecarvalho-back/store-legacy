@@ -2,7 +2,7 @@
   "name": "user/php-legado",
   "autoload": {
     "psr-4": {
-      "User\\PhpLegado\\": "src/"
+      "User\\PhpLegado\\": "app/"
     }
   },
   "authors": [
