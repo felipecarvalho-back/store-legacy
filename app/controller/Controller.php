@@ -4,4 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-abstract class Controller {}
+abstract class Controller
+{
+    protected static function view()
+    {
+        echo "entrou no view";
+    }
+}
