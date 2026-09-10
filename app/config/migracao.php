@@ -1,57 +1,95 @@
 <?php
 
-$database = new PDO('sqlite:database.sqlite3');
+declare(strict_types=1);
 
+require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
+$dotenv->safeLoad();
+
+$host   = $_ENV['HOST'] ?? 'localhost';
+$dbname = $_ENV['DB_NAME'] ?? 'db_roupas';
+$user   = $_ENV['USERNAME'] ?? 'root';
+$pass   = $_ENV['PASSWORD'] ?? '';
+
+// 1. Garante que o banco de dados exista antes de selecioná-lo
+try {
+    $dsnInit = "mysql:host={$host};charset=utf8mb4";
+    $pdoInit = new PDO($dsnInit, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    ]);
+    $pdoInit->exec("CREATE DATABASE IF NOT EXISTS `{$dbname}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+} catch (PDOException $e) {
+    die("Erro ao verificar/criar o banco de dados '{$dbname}': " . $e->getMessage() . PHP_EOL);
+}
+
+// 2. Conecta ao banco de dados específico
+try {
+    $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
+    $database = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+} catch (PDOException $e) {
+    die("Erro ao conectar ao banco de dados: " . $e->getMessage() . PHP_EOL);
+}
+
+// 3. Criação de tabelas compatíveis com MySQL
 $database->exec("CREATE TABLE IF NOT EXISTS produtos (
-                 id INTEGER PRIMARY KEY,
-                 titulo TEXT,
-                 descricao TEXT,
-                 preco REAL,
-                 desconto REAL,
-                 preco_final REAL,
-                 criado_em INTEGER)");
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255),
+    descricao TEXT,
+    preco DECIMAL(10, 2),
+    desconto DECIMAL(10, 2),
+    preco_final DECIMAL(10, 2),
+    criado_em INT
+)");
 
 $database->exec("CREATE TABLE IF NOT EXISTS categorias (
-                 id INTEGER PRIMARY KEY,
-                 titulo TEXT,
-                 criado_em INTEGER)");
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255),
+    criado_em INT
+)");
 
 $database->exec("CREATE TABLE IF NOT EXISTS categorias_produtos (
-                 id_produto INTEGER,
-                 id_categoria INTEGER)");
+    id_produto INT,
+    id_categoria INT
+)");
 
 $database->exec("CREATE TABLE IF NOT EXISTS carrinho (
-                 id INTEGER PRIMARY KEY,
-                 produtos TEXT,
-                 email TEXT,
-                 nome TEXT,
-                 endereco TEXT,
-                 tipo_pagamento TEXT,
-                 total REAL,
-                 criado_em INTEGER)");
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produtos TEXT,
+    email VARCHAR(255),
+    nome VARCHAR(255),
+    endereco TEXT,
+    tipo_pagamento VARCHAR(50),
+    total DECIMAL(10, 2),
+    criado_em VARCHAR(50)
+)");
 
 $database->exec("CREATE TABLE IF NOT EXISTS codigos_promocionais (
-                 codigo TEXT PRIMARY KEY,
-                 desconto REAL,
-                 usado BOOLEAN)");
+    codigo VARCHAR(50) PRIMARY KEY,
+    desconto DECIMAL(10, 2),
+    usado TINYINT(1) DEFAULT 0
+)");
 
 $database->exec("CREATE TABLE IF NOT EXISTS configuracoes (
-                 chave TEXT PRIMARY KEY,
-                 valor TEXT)");
+    chave VARCHAR(100) PRIMARY KEY,
+    valor TEXT
+)");
 
 $database->exec("CREATE TABLE IF NOT EXISTS versao (
-                 versao INTEGER DEFAULT 0)");
+    versao INT DEFAULT 0
+)");
 
-$versao = $database->query("SELECT MAX(versao) as versao FROM versao");
-$versao = $versao->fetch();
-$versao = (int) $versao['versao'];
-
-// var_dump($versao);
+$versaoStmt = $database->query("SELECT MAX(versao) as versao FROM versao");
+$versaoRow  = $versaoStmt ? $versaoStmt->fetch() : null;
+$versao     = (int) ($versaoRow['versao'] ?? 0);
 
 if ($versao < 1) { // install
-
     $criado_em = strtotime('2014-06-03 15:48:07');
-    // var_dump($criado_em);
 
     // produtos
     $database->exec("INSERT INTO produtos (id, titulo, descricao, preco, desconto, preco_final, criado_em)
@@ -98,7 +136,9 @@ if ($versao < 1) { // install
 
     // versionamento
     $database->exec("INSERT INTO versao (versao) VALUES (1)");
+    echo "Migração versão 1 aplicada com sucesso." . PHP_EOL;
 }
+
 if ($versao < 2) {
     $criado_em = strtotime('2014-08-12 15:48:07');
 
@@ -138,13 +178,17 @@ if ($versao < 2) {
 
     // versionamento
     $database->exec("INSERT INTO versao (versao) VALUES (2)");
+    echo "Migração versão 2 aplicada com sucesso." . PHP_EOL;
 }
+
 if ($versao < 3) {
     $database->exec("INSERT INTO configuracoes (chave, valor) VALUES ('produtos_home', '16, 12, 11, 4, 15, 6, 10, 7, 2')");
 
     // versionamento
     $database->exec("INSERT INTO versao (versao) VALUES (3)");
+    echo "Migração versão 3 aplicada com sucesso." . PHP_EOL;
 }
+
 if ($versao < 4) {
     $database->exec("INSERT INTO codigos_promocionais (codigo, desconto, usado) VALUES ('UFUFEQ82', 10, 0)");
     $database->exec("INSERT INTO codigos_promocionais (codigo, desconto, usado) VALUES ('D9U91EF8', 10, 0)");
@@ -155,5 +199,11 @@ if ($versao < 4) {
 
     // versionamento
     $database->exec("INSERT INTO versao (versao) VALUES (4)");
+    echo "Migração versão 4 aplicada com sucesso." . PHP_EOL;
 }
-?>
+
+$versaoFinalStmt = $database->query("SELECT MAX(versao) as versao FROM versao");
+$versaoFinalRow  = $versaoFinalStmt ? $versaoFinalStmt->fetch() : null;
+$versaoFinal     = (int) ($versaoFinalRow['versao'] ?? 0);
+
+echo "Banco de dados atualizado com sucesso na versão {$versaoFinal}!" . PHP_EOL;
