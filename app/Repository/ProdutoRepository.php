@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\DTO\ProdutoHomeDTO;
 use App\Entity\Produto;
 use PDO;
 
@@ -14,21 +15,50 @@ class ProdutoRepository
     ) {}
 
     /**
-     * @return Produto[]
+     * @return ProdutoHomeDTO[]
      */
-    public function listar(): array
+    public function getConfiProdutos(): array
     {
-        $stmt = $this->db->query("SELECT id, titulo, descricao, preco, desconto, preco_final, criado_em FROM produtos ORDER BY id ASC");
-        $linhas = $stmt->fetchAll();
+        $config = $this->db->query("SELECT valor FROM configuracoes WHERE chave = 'produtos_home'")->fetch();
 
-        return array_map(fn (array $dados) => new Produto(
+        if (empty($config['valor'])) {
+            return [];
+        }
+
+        $ids = array_filter(array_map('intval', explode(',', $config['valor'])));
+
+        if (empty($ids)) {
+            return [];
+        }
+
+        $produtos_ids = implode(', ', $ids);
+
+        $orderBy = "FIELD(produtos.id, {$produtos_ids})";
+
+        $sql = "SELECT                                                                                                                
+                produtos.id,                                                                                                      
+                COALESCE(GROUP_CONCAT(categorias.titulo SEPARATOR ', '), '') AS categoria,                                                      
+                produtos.titulo,                                                                                                  
+                produtos.preco,                                                                                                   
+                produtos.desconto,                                                                                                
+                produtos.preco_final                                                                                              
+            FROM produtos                                                                                                         
+            LEFT JOIN categorias_produtos ON produtos.id = categorias_produtos.id_produto                                         
+            LEFT JOIN categorias ON categorias_produtos.id_categoria = categorias.id                                              
+            WHERE produtos.id IN ({$produtos_ids})
+            GROUP BY produtos.id
+            ORDER BY {$orderBy}
+            LIMIT 9";
+
+        $linhas = $this->db->query($sql)->fetchAll();
+
+        return array_map(fn(array $dados) => new ProdutoHomeDTO(
             id: (int) $dados['id'],
             titulo: (string) $dados['titulo'],
-            descricao: (string) $dados['descricao'],
+            categoria: (string) ($dados['categoria'] ?? ''),
             preco: (float) $dados['preco'],
-            desconto: (float) $dados['desconto'],
-            precoFinal: (float) $dados['preco_final'],
-            criadoEm: isset($dados['criado_em']) ? (int) $dados['criado_em'] : null
+            desconto: (int) $dados['desconto'],
+            precoFinal: (float) $dados['preco_final']
         ), $linhas);
     }
 }
