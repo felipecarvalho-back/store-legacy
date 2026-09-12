@@ -76,6 +76,17 @@ body {
     color: #ffffff !important;
 }
 
+.navbar .nav-link {
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
+}
+
+.navbar .nav-link:hover:not(.active) {
+    background-color: #eff6ff;
+    color: var(--color-primary) !important;
+}
+
 /* =========================================================
    Banner de Propaganda / Anúncio
    ========================================================= */
@@ -209,11 +220,27 @@ body {
    Estilização moderna para o rodapé (rodape.inc.php)
    ========================================================= */
 .rodape {
-    background: #0f172a;
+    background: #0f172a !important;
     color: #94a3b8;
-    padding: 64px 20px 48px;
-    margin-top: 5rem;
-    border-top: 1px solid #1e293b;
+    border-top: 1px solid #1e293b !important;
+}
+
+.rodape .nav-link {
+    color: #94a3b8;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.rodape .nav-link:hover {
+    color: #ffffff !important;
+    transform: translateX(4px);
+}
+
+.rodape .bi {
+    transition: transform 0.2s ease;
+}
+
+.rodape .nav-link:hover .bi {
+    transform: scale(1.15);
 }
 
 .rodape .wapper {

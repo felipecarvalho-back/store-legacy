@@ -21,7 +21,7 @@
     <main class="container py-4">
 
         <!-- Inclusão do menu de navegação -->
-        <?php include 'menu.inc.php'; ?>
+        <?php include __DIR__ . '/partials/menu.inc.php'; ?>
 
         <!-- Anúncio / Banner publicitário -->
         <div class="banner-ad">
@@ -103,7 +103,7 @@
     </main>
 
     <!-- Inclusão do rodapé -->
-    <?php include 'rodape.inc.php'; ?>
+    <?php include __DIR__ . '/partials/rodape.inc.php'; ?>
 
     <!-- Bootstrap 5.3 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
