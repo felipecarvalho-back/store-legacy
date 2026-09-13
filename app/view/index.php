@@ -1,4 +1,5 @@
 <?php
+
 /** @var \App\DTO\ProdutoHomeDTO[] $produtos */
 ?>
 <!DOCTYPE html>
@@ -54,14 +55,14 @@
             <?php foreach ($produtos as $produto): ?>
                 <div class="col">
                     <div class="card h-100 card-produto shadow-sm">
-                        <a href="/produtos.php?cod=<?= (int) $produto->id ?>" class="card-produto-link">
+                        <a href="produto/<?= (int) $produto->id ?>" class="card-produto-link">
                             <!-- Wrapper da imagem com zoom e badge -->
                             <div class="produto-img-wrapper">
-                                <img class="produto-img" 
-                                     src="/img/<?= (int) $produto->id ?>.jpg" 
-                                     alt="<?= htmlspecialchars($produto->categoria) ?>: <?= htmlspecialchars($produto->titulo) ?>" 
-                                     loading="lazy" />
-                                
+                                <img class="produto-img"
+                                    src="/img/<?= (int) $produto->id ?>.jpg"
+                                    alt="<?= htmlspecialchars($produto->categoria) ?>: <?= htmlspecialchars($produto->titulo) ?>"
+                                    loading="lazy" />
+
                                 <?php if ($produto->desconto > 0): ?>
                                     <span class="badge-desconto">
                                         <i class="bi bi-arrow-down-short"></i>-<?= (int) $produto->desconto ?>%
@@ -74,7 +75,7 @@
                                 <span class="produto-categoria-tag mb-1">
                                     <i class="bi bi-tag-fill me-1"></i><?= htmlspecialchars($produto->categoria ?: 'Geral') ?>
                                 </span>
-                                
+
                                 <h2 class="produto-titulo">
                                     <?= htmlspecialchars($produto->titulo) ?>
                                 </h2>

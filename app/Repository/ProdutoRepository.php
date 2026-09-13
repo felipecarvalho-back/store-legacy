@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\DTO\ProdutoCategoriaDTO;
 use App\DTO\ProdutoHomeDTO;
 use PDO;
 
@@ -59,5 +60,34 @@ class ProdutoRepository
             desconto: (int) $dados['desconto'],
             precoFinal: (float) $dados['preco_final']
         ), $linhas);
+    }
+
+    public function getDescricaoProduto(int $prodId): ?ProdutoCategoriaDTO
+    {
+        $stmt = $this->db->prepare(
+            "SELECT produtos.id as id, categorias.id as categoria_id, categorias.titulo as categoria, produtos.titulo,        
+                        produtos.descricao, produtos.preco, produtos.desconto, produtos.preco_final                                                     
+                FROM produtos                                                                                                     
+                JOIN categorias_produtos ON categorias_produtos.id_produto = produtos.id                                          
+                JOIN categorias ON categorias_produtos.id_categoria = categorias.id                                               
+                WHERE produtos.id = :id"
+        );
+        $stmt->execute(['id' => $prodId]);
+        $dados = $stmt->fetch();
+
+        if (!$dados) {
+            return null;
+        }
+
+        return new ProdutoCategoriaDTO(
+            id: (int) $dados['id'],
+            categoria_id: (int) $dados['categoria_id'],
+            categoria: (string) $dados['categoria'],
+            titulo: (string) $dados['titulo'],
+            descricao: (string) $dados['descricao'],
+            preco: (float) $dados['preco'],
+            desconto: (int) $dados['desconto'],
+            precoFinal: (float) $dados['preco_final']
+        );
     }
 }
