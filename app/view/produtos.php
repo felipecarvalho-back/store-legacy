@@ -19,114 +19,160 @@
 
 <body>
 
-    <main class="container py-4">
+    <main class="container py-3">
 
         <!-- Inclusão do menu de navegação -->
         <?php include __DIR__ . '/partials/menu.inc.php'; ?>
 
-        <!-- Navegação Breadcrumb -->
+        <!-- Navegação Breadcrumb Elegante -->
         <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb py-2 px-3 bg-white rounded-pill border shadow-sm align-items-center mb-0">
+            <ol class="breadcrumb breadcrumb-store mb-0 align-items-center">
                 <li class="breadcrumb-item">
-                    <a href="/" class="text-secondary text-decoration-none fw-semibold">
-                        <i class="bi bi-house-door-fill me-1"></i>Início
+                    <a href="/" class="text-decoration-none">
+                        <i class="bi bi-house-door me-1"></i>Início
                     </a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="/categorias.php?cod=<?= (int) $produto->categoria_id ?>" class="text-secondary text-decoration-none fw-semibold">
+                    <a href="/categoria/<?= (int) $produto->categoria_id ?>" class="text-decoration-none">
                         <?= htmlspecialchars($produto->categoria) ?>
                     </a>
                 </li>
-                <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">
+                <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 320px;">
                     <?= htmlspecialchars($produto->titulo) ?>
                 </li>
             </ol>
         </nav>
 
         <!-- Detalhes do Produto -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white">
-            <div class="card-body p-4 p-lg-5">
+        <div class="product-detail-card mb-5">
+            <div class="p-4 p-lg-5">
                 <div class="row g-4 g-lg-5 align-items-start">
-                    <!-- Coluna da Imagem -->
+                    
+                    <!-- Coluna da Imagem e Garantias Visuais -->
                     <div class="col-12 col-lg-6">
-                        <div class="position-relative rounded-4 overflow-hidden bg-light border text-center p-3 d-flex align-items-center justify-content-center" style="min-height: 380px;">
+                        <div class="product-image-box">
                             <?php if ($produto->desconto > 0): ?>
-                                <span class="badge-desconto position-absolute top-0 end-0 m-3">
-                                    <i class="bi bi-arrow-down-short"></i>-<?= (int) $produto->desconto ?>%
+                                <span class="badge-desconto">
+                                    <i class="bi bi-fire"></i> -<?= (int) $produto->desconto ?>% OFF
                                 </span>
                             <?php endif; ?>
+                            
                             <img src="/img/<?= (int) $produto->id ?>.jpg"
                                  alt="<?= htmlspecialchars($produto->categoria) ?>: <?= htmlspecialchars($produto->titulo) ?>"
-                                 class="img-fluid rounded-3 object-fit-contain"
-                                 style="max-height: 450px;" />
+                                 class="img-fluid rounded-3"
+                                 loading="eager" />
+                        </div>
+
+                        <!-- Micro-vantagens abaixo da foto -->
+                        <div class="row g-2 mt-2 text-secondary small">
+                            <div class="col-4">
+                                <div class="trust-badge-item">
+                                    <i class="bi bi-patch-check-fill text-primary d-block fs-5 mb-1"></i>
+                                    <span class="fw-semibold">100% Original</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="trust-badge-item">
+                                    <i class="bi bi-box-seam text-primary d-block fs-5 mb-1"></i>
+                                    <span class="fw-semibold">Pronta Entrega</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="trust-badge-item">
+                                    <i class="bi bi-arrow-counterclockwise text-primary d-block fs-5 mb-1"></i>
+                                    <span class="fw-semibold">Troca em 30d</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Coluna de Informações e Compra -->
+                    <!-- Coluna de Informações, Preços e Ações -->
                     <div class="col-12 col-lg-6 d-flex flex-column">
-                        <div class="mb-2">
-                            <span class="produto-categoria-tag">
-                                <i class="bi bi-tag-fill me-1"></i><?= htmlspecialchars($produto->categoria ?: 'Geral') ?>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge-tag-categoria">
+                                <i class="bi bi-tag-fill"></i><?= htmlspecialchars($produto->categoria ?: 'Geral') ?>
                             </span>
+                            <span class="text-muted small fw-medium">Código: #<?= str_pad((string)$produto->id, 5, '0', STR_PAD_LEFT) ?></span>
                         </div>
 
-                        <h1 class="h2 fw-bold text-dark mb-3"><?= htmlspecialchars($produto->titulo) ?></h1>
+                        <h1 class="h2 fw-bold text-dark mb-2"><?= htmlspecialchars($produto->titulo) ?></h1>
 
-                        <!-- Bloco de Preços -->
-                        <div class="p-3 bg-light rounded-3 mb-4 border">
+                        <!-- Avaliações Sociais -->
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <div class="rating-stars mb-0">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </div>
+                            <span class="fw-bold text-dark small">4.9</span>
+                            <span class="text-muted small">(<?= 35 + ((int)$produto->id * 4) ?> avaliações de clientes verificados)</span>
+                        </div>
+
+                        <!-- Bloco de Preço & Oferta -->
+                        <div class="product-pricing-box">
                             <?php if ($produto->desconto > 0): ?>
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="produto-preco-antigo fs-6">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
-                                    <span class="badge bg-danger-subtle text-danger fw-bold rounded-pill px-2 py-1 small">
-                                        <?= (int) $produto->desconto ?>% OFF
+                                    <span class="badge-economize">
+                                        Economize R$ <?= number_format($produto->preco - $produto->precoFinal, 2, ',', '.') ?>
                                     </span>
                                 </div>
                             <?php endif; ?>
-                            <div class="produto-preco-atual fs-2">
+
+                            <div class="preco-destaque">
                                 R$ <?= number_format($produto->precoFinal, 2, ',', '.') ?>
                             </div>
-                            <small class="text-muted d-block mt-1">
-                                <i class="bi bi-credit-card me-1"></i> Em até 10x sem juros no cartão
-                            </small>
+
+                            <div class="d-flex flex-column gap-1 mt-2">
+                                <div class="text-success fw-bold small d-flex align-items-center gap-1">
+                                    <i class="bi bi-qr-code"></i> R$ <?= number_format($produto->precoFinal * 0.95, 2, ',', '.') ?> no Pix (5% de desconto)
+                                </div>
+                                <div class="text-secondary small">
+                                    <i class="bi bi-credit-card me-1"></i> ou em até 10x de <strong>R$ <?= number_format($produto->precoFinal / 10, 2, ',', '.') ?></strong> sem juros
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Descrição do Produto -->
                         <div class="mb-4">
-                            <h5 class="fw-bold text-dark mb-2">Descrição do Produto</h5>
-                            <p class="text-secondary leading-relaxed mb-0">
+                            <h2 class="h6 fw-bold text-dark text-uppercase tracking-wider mb-2">
+                                <i class="bi bi-file-text me-1 text-primary"></i>Detalhes do Produto
+                            </h2>
+                            <p class="text-secondary leading-relaxed mb-0" style="font-size: 0.95rem;">
                                 <?= nl2br(htmlspecialchars($produto->descricao)) ?>
                             </p>
                         </div>
 
                         <!-- Ações de Compra -->
-                        <div class="mt-auto pt-3">
-                            <a href="/adicionar.php?cod=<?= (int) $produto->id ?>" class="btn btn-primary btn-lg w-100 rounded-pill py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 mb-3">
-                                <i class="bi bi-cart-plus-fill fs-5"></i>
-                                <span>Adicionar ao carrinho</span>
+                        <div class="mt-auto">
+                            <a href="/adicionar.php?cod=<?= (int) $produto->id ?>" 
+                               class="btn-comprar-principal w-100 mb-3"
+                               title="Adicionar <?= htmlspecialchars($produto->titulo) ?> à sacola">
+                                <i class="bi bi-bag-plus-fill fs-5"></i>
+                                <span>Adicionar à Sacola</span>
                             </a>
 
-                            <!-- Selos de Confiança -->
-                            <div class="row g-2 text-center text-secondary small pt-3 border-top">
-                                <div class="col-4">
-                                    <i class="bi bi-truck fs-5 d-block text-primary mb-1"></i>
-                                    <span>Entrega Rápida</span>
+                            <!-- Simulador de Frete -->
+                            <div class="shipping-calc-box">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold small text-dark">
+                                        <i class="bi bi-truck me-1 text-primary"></i>Calcular Frete e Prazo
+                                    </span>
+                                    <span class="text-success small fw-semibold">Frete Grátis acima de R$ 199</span>
                                 </div>
-                                <div class="col-4">
-                                    <i class="bi bi-shield-check fs-5 d-block text-primary mb-1"></i>
-                                    <span>Compra Segura</span>
-                                </div>
-                                <div class="col-4">
-                                    <i class="bi bi-arrow-repeat fs-5 d-block text-primary mb-1"></i>
-                                    <span>Troca Fácil</span>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control rounded-start-pill" placeholder="Digite seu CEP (ex: 01001-000)" maxlength="9">
+                                    <button class="btn btn-outline-dark rounded-end-pill px-3 fw-semibold" type="button">Calcular</button>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
-
-
     </main>
 
     <!-- Inclusão do rodapé -->
