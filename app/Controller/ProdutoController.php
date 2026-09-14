@@ -33,4 +33,19 @@ class ProdutoController extends Controller
             'categorias' => $categorias
         ]);
     }
+
+    public function categoria($request, $response, array $args)
+    {
+        $id = (int) $args['id'];
+
+        $produtos = $this->categoriaRepository->getAllCategoria($id);
+
+        $categorias = $this->categoriaRepository->getCategoria();
+
+        return $this->view('categorias', [
+            'produtos' => $produtos, 
+            'categorias' => $categorias,
+            'categoria_id' => $id
+        ]);
+    }
 }
