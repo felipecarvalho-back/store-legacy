@@ -1,6 +1,6 @@
 <?php
 /** @var \App\Entity\Categoria[]|array[] $categorias */
-$nomeLoja = defined('LOJA') ? LOJA : ($titulo ?? 'Loja');
+$nomeLoja = defined('LOJA') ? LOJA : 'Loja Exclusiva';
 $listaCategorias = $categorias ?? [];
 
 $itensCarrinho = 0;
@@ -9,63 +9,92 @@ if (!empty($_COOKIE['carrinho'])) {
 }
 ?>
 
-<nav class="navbar navbar-expand-lg bg-white shadow-sm rounded-4 border px-3 py-2 mb-4" aria-label="Navegação principal">
-    <div class="container-fluid px-0">
-        <a class="navbar-brand fw-bold text-dark d-flex align-items-center me-3" href="/" title="<?= htmlspecialchars($nomeLoja) ?>">
-            <i class="bi bi-shop me-2 text-primary fs-4"></i>
-            <span><?= htmlspecialchars($nomeLoja) ?></span>
-        </a>
-
-        <button class="navbar-toggler border-0 shadow-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLoja" aria-controls="navbarLoja" aria-expanded="false" aria-label="Alternar navegação">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarLoja">
-            <div class="vr d-none d-lg-block me-3 my-auto text-secondary opacity-25" style="height: 24px;"></div>
-
-            <ul class="navbar-nav nav-pills me-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
-                <li class="nav-item">
-                    <a class="nav-link rounded-pill px-3 <?= (!isset($categoria_id) || empty($categoria_id)) ? 'active' : 'text-secondary' ?>" 
-                       href="/" 
-                       <?= (!isset($categoria_id) || empty($categoria_id)) ? 'aria-current="page"' : '' ?>>
-                        <i class="bi bi-house-door me-1"></i>Início
-                    </a>
-                </li>
-
-                <?php foreach ($listaCategorias as $categoria): ?>
-                    <?php
-                    $idCat = is_object($categoria) ? (int) $categoria->id : (int) $categoria['id'];
-                    $tituloCat = is_object($categoria) ? (string) $categoria->titulo : (string) $categoria['titulo'];
-                    $selecionado = isset($categoria_id) && (int) $categoria_id === $idCat;
-                    ?>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-pill px-3 <?= $selecionado ? 'active' : 'text-secondary' ?>" 
-                           href="/categorias.php?cod=<?= $idCat ?>" 
-                           title="<?= htmlspecialchars($tituloCat) ?>"
-                           <?= $selecionado ? 'aria-current="page"' : '' ?>>
-                            <?= htmlspecialchars($tituloCat) ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-
-            <!-- Botão do Carrinho -->
-            <div class="d-flex align-items-center ms-lg-auto my-2 my-lg-0">
-                <?php if ($itensCarrinho > 0): ?>
-                    <a class="btn btn-primary btn-sm rounded-pill d-inline-flex align-items-center px-3 py-2 shadow-sm" href="/carrinho.php">
-                        <i class="bi bi-cart3 me-1 fs-6"></i>
-                        <span>Carrinho</span>
-                        <span class="badge bg-white text-primary rounded-pill ms-2 fw-bold">
-                            <?= $itensCarrinho ?>
-                        </span>
-                    </a>
-                <?php else: ?>
-                    <a class="btn btn-outline-secondary btn-sm rounded-pill d-inline-flex align-items-center px-3 py-2" href="/carrinho.php">
-                        <i class="bi bi-cart3 me-1 fs-6"></i>
-                        <span>Carrinho</span>
-                    </a>
-                <?php endif; ?>
-            </div>
+<!-- Barra de Benefícios Superior -->
+<div class="top-notice-bar d-none d-md-block mb-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <span class="badge bg-primary px-2 py-1 me-2 rounded-pill fw-bold">NOVIDADE</span>
+            <span>Frete Grátis acima de R$ 199 para todo o país</span>
+            <span class="bullet-dot"></span>
+            <span>Parcele em até 10x sem juros</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/central-de-atendimento" class="top-notice-link text-decoration-none">
+                <i class="bi bi-headset me-1"></i>Atendimento
+            </a>
+            <span class="text-secondary opacity-50">|</span>
+            <span class="text-white-50"><i class="bi bi-shield-check me-1 text-success"></i>Compra 100% Segura</span>
         </div>
     </div>
-</nav>
+</div>
+
+<!-- Header com Navbar Sticky Translúcida -->
+<div class="header-sticky-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-store" aria-label="Navegação Principal da Loja">
+        <div class="container-fluid px-0">
+            <!-- Marca / Logo da Loja -->
+            <a class="navbar-brand d-flex align-items-center me-4 py-0" href="/" title="<?= htmlspecialchars($nomeLoja) ?>">
+                <div class="brand-badge-icon me-2">
+                    <i class="bi bi-bag-check-fill"></i>
+                </div>
+                <div class="d-flex flex-column">
+                    <span class="brand-title"><?= htmlspecialchars($nomeLoja) ?></span>
+                    <span class="brand-subtitle">Store &amp; Lifestyle</span>
+                </div>
+            </a>
+
+            <!-- Botão Hamburguer Mobile -->
+            <button class="navbar-toggler border-0 shadow-none p-2 rounded-3 bg-light" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#navbarLojaMenu" 
+                    aria-controls="navbarLojaMenu" 
+                    aria-expanded="false" 
+                    aria-label="Abrir menu de navegação">
+                <i class="bi bi-list fs-3 text-dark"></i>
+            </button>
+
+            <!-- Links e Categorias -->
+            <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarLojaMenu">
+                <ul class="navbar-nav me-auto mb-3 mb-lg-0 align-items-lg-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-store <?= (!isset($categoria_id) || empty($categoria_id)) ? 'active' : '' ?>" 
+                           href="/" 
+                           <?= (!isset($categoria_id) || empty($categoria_id)) ? 'aria-current="page"' : '' ?>>
+                            <i class="bi bi-grid-fill me-1 small"></i>Todos os Produtos
+                        </a>
+                    </li>
+
+                    <?php foreach ($listaCategorias as $categoria): ?>
+                        <?php
+                        $idCat = is_object($categoria) ? (int) $categoria->id : (int) $categoria['id'];
+                        $tituloCat = is_object($categoria) ? (string) $categoria->titulo : (string) $categoria['titulo'];
+                        $selecionado = isset($categoria_id) && (int) $categoria_id === $idCat;
+                        ?>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-store <?= $selecionado ? 'active' : '' ?>" 
+                               href="/categoria/<?= $idCat ?>" 
+                               title="Ver categoria <?= htmlspecialchars($tituloCat) ?>"
+                               <?= $selecionado ? 'aria-current="page"' : '' ?>>
+                                <?= htmlspecialchars(ucfirst($tituloCat)) ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+
+                <!-- Ações da Direita (Carrinho) -->
+                <div class="d-flex align-items-center gap-2 pt-2 pt-lg-0 border-top border-lg-0">
+                    <a class="btn-carrinho" href="/carrinho.php" title="Ver meu carrinho de compras">
+                        <i class="bi bi-bag-fill fs-6"></i>
+                        <span>Sacola</span>
+                        <?php if ($itensCarrinho > 0): ?>
+                            <span class="carrinho-badge ms-1"><?= $itensCarrinho ?></span>
+                        <?php else: ?>
+                            <span class="carrinho-badge ms-1">0</span>
+                        <?php endif; ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
