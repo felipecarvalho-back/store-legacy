@@ -147,7 +147,7 @@
 
                         <!-- Ações de Compra -->
                         <div class="mt-auto">
-                            <a href="/adicionar.php?cod=<?= (int) $produto->id ?>" 
+                            <a href="/adicionar/<?= $produto->id ?>" 
                                class="btn-comprar-principal w-100 mb-3"
                                title="Adicionar <?= htmlspecialchars($produto->titulo) ?> à sacola">
                                 <i class="bi bi-bag-plus-fill fs-5"></i>

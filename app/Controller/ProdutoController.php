@@ -43,9 +43,23 @@ class ProdutoController extends Controller
         $categorias = $this->categoriaRepository->getCategoria();
 
         return $this->view('categorias', [
-            'produtos' => $produtos, 
+            'produtos' => $produtos,
             'categorias' => $categorias,
             'categoria_id' => $id
         ]);
+    }
+
+    public function adicionar($request, $response, array $args)
+    {
+        $id = (int) $args['id'];
+
+        $produtos = trim($_COOKIE['carrinho'] . ',' . $id, ',');
+        $produtos = explode(',', $produtos);
+        $produtos = array_unique($produtos);
+        $produtos = implode(',', $produtos);
+
+        setcookie('carrinho', $produtos, time() + 3600);
+
+        // header('Location: /carrinho.php');
     }
 }

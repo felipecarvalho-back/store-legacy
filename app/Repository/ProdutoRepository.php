@@ -90,4 +90,13 @@ class ProdutoRepository
             precoFinal: (float) $dados['preco_final']
         );
     }
+
+    public function getIdProduto(int $prodId) : int
+    {
+        $stmt = $this->db->prepare("SELECT produtos.id FROM produtos WHERE produtos.id = :id")->fetch();
+        $stmt->execute(['id' => $prodId]);
+        $id = $stmt->fetch();
+
+        return $id;
+    }
 }
