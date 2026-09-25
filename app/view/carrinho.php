@@ -1,39 +1,10 @@
 <?php
-/** @var array[] $carrinho */
-/** @var array[] $produtos */
 
-require_once dirname(__DIR__) . '/config/funcoes.php';
+/** @var \App\DTO\CarrinhoDTO $carrinho */
+/** @var \App\Entity\Categoria[]|array[] $categorias */
 
-if (!defined('LOJA')) {
-    define('LOJA', 'Loja Legado');
-}
-
-$carrinho = $carrinho ?? [];
-$produtos = $produtos ?? [];
-
-// Gerenciamento seguro do cupom de desconto
-$codigo_promocional = filter_input(INPUT_POST, 'codigo_promocional') ?? ($_POST['codigo_promocional'] ?? null);
-if (!$codigo_promocional && !empty($_COOKIE['codigo_promocional'])) {
-    $codigo_promocional = (string) $_COOKIE['codigo_promocional'];
-}
-
-if ($codigo_promocional) {
-    setcookie('codigo_promocional', (string) $codigo_promocional, time() + 3600, '/');
-}
-
-// Cálculo do subtotal original
-$subtotalOriginal = 0;
-foreach ($carrinho as $item) {
-    $subtotalOriginal += (float) ($item['preco_final'] ?? $item['preco'] ?? 0);
-}
-
-// Descontos e totais calculados pelas regras de negócio
-$porcentagemPreco = precoComDesconto($carrinho, $codigo_promocional);
-$porcentagem = $porcentagemPreco[0] ?? 0;
-$total = $porcentagemPreco[1] ?? $subtotalOriginal;
-$desconto_codigo_promocional = $porcentagemPreco[2] ?? 0;
-
-$qtdItens = count($carrinho);
+$nomeLoja = defined('LOJA') ? LOJA : 'Loja Legado';
+$qtdItens = $carrinho->quantidadeItens;
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -41,7 +12,7 @@ $qtdItens = count($carrinho);
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meu Carrinho - <?= htmlspecialchars((string) LOJA) ?></title>
+    <title>Meu Carrinho - <?= htmlspecialchars((string) $nomeLoja) ?></title>
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Bootstrap Icons -->
@@ -102,33 +73,27 @@ $qtdItens = count($carrinho);
                             </div>
                         </div>
 
-                        <?php foreach ($carrinho as $produto): 
-                            $idProd = (int) ($produto['id'] ?? 0);
-                            $tituloProd = (string) ($produto['titulo'] ?? 'Produto');
-                            $precoBase = (float) ($produto['preco'] ?? 0);
-                            $descontoProd = (int) ($produto['desconto'] ?? 0);
-                            $precoFinal = (float) ($produto['preco_final'] ?? $precoBase);
-                        ?>
+                        <?php foreach ($carrinho->itens as $item): ?>
                             <div class="cart-item-row d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                                 <!-- Imagem e Título -->
                                 <div class="d-flex align-items-center gap-3">
-                                    <a href="/produto/<?= $idProd ?>">
-                                        <img src="/img/<?= $idProd ?>.jpg" 
-                                             alt="<?= htmlspecialchars($tituloProd) ?>" 
+                                    <a href="/produto/<?= $item->id ?>">
+                                        <img src="/img/<?= $item->id ?>.jpg" 
+                                             alt="<?= htmlspecialchars($item->titulo) ?>" 
                                              class="cart-item-thumb"
                                              onerror="this.src='/img/1.jpg';" />
                                     </a>
                                     <div>
-                                        <a href="/produto/<?= $idProd ?>" class="cart-item-title d-block">
-                                            <?= htmlspecialchars($tituloProd) ?>
+                                        <a href="/produto/<?= $item->id ?>" class="cart-item-title d-block">
+                                            <?= htmlspecialchars($item->titulo) ?>
                                         </a>
                                         <div class="d-flex align-items-center gap-2 mt-1">
                                             <span class="badge bg-light text-secondary border small">
-                                                Cód: #<?= str_pad((string)$idProd, 4, '0', STR_PAD_LEFT) ?>
+                                                Cód: #<?= str_pad((string)$item->id, 4, '0', STR_PAD_LEFT) ?>
                                             </span>
-                                            <?php if ($descontoProd > 0): ?>
+                                            <?php if ($item->desconto > 0): ?>
                                                 <span class="badge bg-danger-subtle text-danger fw-bold small">
-                                                    -<?= $descontoProd ?>% OFF
+                                                    -<?= $item->desconto ?>% OFF
                                                 </span>
                                             <?php endif; ?>
                                         </div>
@@ -138,20 +103,20 @@ $qtdItens = count($carrinho);
                                 <!-- Preços e Ações -->
                                 <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-4 mt-2 mt-md-0 pt-2 pt-md-0 border-top border-md-0">
                                     <div class="text-md-end">
-                                        <?php if ($descontoProd > 0): ?>
+                                        <?php if ($item->desconto > 0): ?>
                                             <div class="text-muted text-decoration-line-through small">
-                                                R$ <?= number_format($precoBase, 2, ',', '.') ?>
+                                                R$ <?= number_format($item->preco, 2, ',', '.') ?>
                                             </div>
                                         <?php endif; ?>
                                         <div class="fw-bold fs-6 text-dark">
-                                            R$ <?= number_format($precoFinal, 2, ',', '.') ?>
+                                            R$ <?= number_format($item->precoFinal, 2, ',', '.') ?>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <a href="/remover.php?cod=<?= $idProd ?>" 
+                                        <a href="/remover.php?cod=<?= $item->id ?>" 
                                            class="cart-remove-btn" 
-                                           title="Remover <?= htmlspecialchars($tituloProd) ?> da sacola"
+                                           title="Remover <?= htmlspecialchars($item->titulo) ?> da sacola"
                                            onclick="return confirm('Deseja realmente remover este produto?');">
                                             <i class="bi bi-trash3"></i>
                                             <span class="d-none d-sm-inline">Remover</span>
@@ -204,11 +169,11 @@ $qtdItens = count($carrinho);
                             <label for="inputCupom" class="form-label small fw-bold text-secondary">
                                 <i class="bi bi-ticket-perforated me-1 text-primary"></i>Possui Cupom de Desconto?
                             </label>
-                            <form action="" method="post" class="d-flex gap-2">
+                            <form action="/carrinho" method="post" class="d-flex gap-2">
                                 <input type="text" 
                                        id="inputCupom" 
                                        name="codigo_promocional" 
-                                       value="<?= htmlspecialchars((string) ($codigo_promocional ?? '')) ?>" 
+                                       value="<?= htmlspecialchars((string) ($carrinho->codigoPromocional ?? '')) ?>" 
                                        placeholder="Digite seu cupom" 
                                        class="form-control rounded-pill px-3 text-uppercase" 
                                        required />
@@ -217,13 +182,13 @@ $qtdItens = count($carrinho);
                                 </button>
                             </form>
 
-                            <?php if (!empty($codigo_promocional)): ?>
-                                <?php if ($desconto_codigo_promocional > 0): ?>
+                            <?php if (!empty($carrinho->codigoPromocional)): ?>
+                                <?php if ($carrinho->descontoCupomPercentual > 0): ?>
                                     <div class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 mt-2 rounded-3 small border-0 shadow-xs mb-0">
                                         <i class="bi bi-check-circle-fill text-success fs-6"></i>
                                         <div>
-                                            Cupom <strong><?= htmlspecialchars(strtoupper((string) $codigo_promocional)) ?></strong> ativo:
-                                            <span class="fw-bold"><?= (int) $desconto_codigo_promocional ?>% OFF</span>
+                                            Cupom <strong><?= htmlspecialchars(strtoupper((string) $carrinho->codigoPromocional)) ?></strong> ativo:
+                                            <span class="fw-bold"><?= (int) $carrinho->descontoCupomPercentual ?>% OFF</span>
                                         </div>
                                     </div>
                                 <?php else: ?>
@@ -238,20 +203,20 @@ $qtdItens = count($carrinho);
                         <!-- Detalhamento de Valores -->
                         <div class="cart-price-row">
                             <span>Subtotal (<?= $qtdItens ?> <?= $qtdItens === 1 ? 'item' : 'itens' ?>)</span>
-                            <span class="fw-semibold text-dark">R$ <?= number_format($subtotalOriginal, 2, ',', '.') ?></span>
+                            <span class="fw-semibold text-dark">R$ <?= number_format($carrinho->subtotalOriginal, 2, ',', '.') ?></span>
                         </div>
 
-                        <?php if ($porcentagem > 0): ?>
+                        <?php if ($carrinho->descontoEspecialPercentual > 0): ?>
                             <div class="cart-price-row text-success">
                                 <span><i class="bi bi-gift-fill me-1"></i>Desconto Especial</span>
-                                <span class="fw-bold">-<?= $porcentagem ?>%</span>
+                                <span class="fw-bold">-<?= $carrinho->descontoEspecialPercentual ?>%</span>
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($desconto_codigo_promocional > 0): ?>
+                        <?php if ($carrinho->descontoCupomPercentual > 0): ?>
                             <div class="cart-price-row text-success">
                                 <span><i class="bi bi-tag-fill me-1"></i>Cupom Promocional</span>
-                                <span class="fw-bold">-<?= (int) $desconto_codigo_promocional ?>%</span>
+                                <span class="fw-bold">-<?= (int) $carrinho->descontoCupomPercentual ?>%</span>
                             </div>
                         <?php endif; ?>
 
@@ -267,13 +232,13 @@ $qtdItens = count($carrinho);
                                 <span class="text-muted small">À vista ou parcelado</span>
                             </div>
                             <span class="cart-total-value">
-                                R$ <?= number_format((float) $total, 2, ',', '.') ?>
+                                R$ <?= number_format($carrinho->total, 2, ',', '.') ?>
                             </span>
                         </div>
 
                         <!-- Parcelamento -->
                         <p class="text-muted small text-end mt-1 mb-4">
-                            Em até <strong>10x de R$ <?= number_format((float) ($total / 10), 2, ',', '.') ?></strong> sem juros
+                            Em até <strong>10x de R$ <?= number_format(($carrinho->total / 10), 2, ',', '.') ?></strong> sem juros
                         </p>
 
                         <!-- Botão de Finalização Principal -->

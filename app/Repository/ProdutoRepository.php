@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\DTO\CarrinhoItemDTO;
 use App\DTO\ProdutoCategoriaDTO;
 use App\DTO\ProdutoHomeDTO;
 use PDO;
@@ -100,24 +101,49 @@ class ProdutoRepository
         return $id;
     }
 
-    public function carrinho(array $carrinho_cookies) : array
+    /**
+     * @param int[]|string[] $carrinho_cookies
+     * @return CarrinhoItemDTO[]
+     */
+    public function getItensCarrinho(array $carrinho_cookies): array
     {
+        $ids = array_filter(array_map('intval', $carrinho_cookies));
+        if (empty($ids)) {
+            return [];
+        }
 
-        $carrinho = array();
-        $produtos = array();
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->db->prepare("SELECT id, titulo, preco, desconto, preco_final FROM produtos WHERE id IN ({$placeholders})");
+        $stmt->execute(array_values($ids));
+        $linhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($carrinho_cookies as $produto) {
+        $produtosMap = [];
+        foreach ($linhas as $linha) {
+            $produtosMap[(int) $linha['id']] = new CarrinhoItemDTO(
+                id: (int) $linha['id'],
+                titulo: (string) $linha['titulo'],
+                preco: (float) $linha['preco'],
+                desconto: (int) $linha['desconto'],
+                precoFinal: (float) $linha['preco_final']
+            );
+        }
 
-            if (preg_match('/^\d+$/', trim($produto))) {
-                $produto = $this->db->query("SELECT produtos.id, produtos.titulo, produtos.preco, produtos.desconto, produtos.preco_final FROM produtos WHERE produtos.id = $produto")
-                    ->fetch(PDO::FETCH_ASSOC);
-                if ($produto) {
-                    $carrinho[] = $produto;
-                    $produtos[] = $produto['id'];
-                }
+        $resultado = [];
+        foreach ($ids as $id) {
+            if (isset($produtosMap[$id])) {
+                $resultado[] = $produtosMap[$id];
             }
         }
 
-        return [$carrinho, $produtos];
+        return $resultado;
+    }
+
+    public function buscarDescontoCupom(string $codigo): int
+    {
+        $stmt = $this->db->prepare("SELECT desconto FROM codigos_promocionais WHERE codigo = :codigo AND usado = 0");
+        $stmt->execute(['codigo' => trim($codigo)]);
+        $desconto = $stmt->fetchColumn();
+
+        return $desconto !== false ? (int) $desconto : 0;
     }
 }
