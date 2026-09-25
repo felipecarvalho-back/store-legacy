@@ -18,11 +18,6 @@ class ProdutoController extends Controller
         $id = (int) $args['id'];
         $produto = $this->produtoRepository->getDescricaoProduto($id);
 
-        if (!$produto) {
-            $response->getBody()->write("Produto não encontrado.");
-            return $response->withStatus(404);
-        }
-
         $categorias = $this->categoriaRepository->getCategoria();
         $categoria_id = $produto->categoria_id;
 
@@ -49,17 +44,5 @@ class ProdutoController extends Controller
         ]);
     }
 
-    public function adicionar($request, $response, array $args)
-    {
-        $id = (int) $args['id'];
-
-        $produtos = trim($_COOKIE['carrinho'] . ',' . $id, ',');
-        $produtos = explode(',', $produtos);
-        $produtos = array_unique($produtos);
-        $produtos = implode(',', $produtos);
-
-        setcookie('carrinho', $produtos, time() + 3600);
-
-        // header('Location: /carrinho.php');
-    }
+    
 }

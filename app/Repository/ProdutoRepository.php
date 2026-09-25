@@ -91,12 +91,33 @@ class ProdutoRepository
         );
     }
 
-    public function getIdProduto(int $prodId) : int
+    public function getIdProduto(int $prodId): int
     {
         $stmt = $this->db->prepare("SELECT produtos.id FROM produtos WHERE produtos.id = :id")->fetch();
         $stmt->execute(['id' => $prodId]);
         $id = $stmt->fetch();
 
         return $id;
+    }
+
+    public function carrinho(array $carrinho_cookies) : array
+    {
+
+        $carrinho = array();
+        $produtos = array();
+
+        foreach ($carrinho_cookies as $produto) {
+
+            if (preg_match('/^\d+$/', trim($produto))) {
+                $produto = $this->db->query("SELECT produtos.id, produtos.titulo, produtos.preco, produtos.desconto, produtos.preco_final FROM produtos WHERE produtos.id = $produto")
+                    ->fetch(PDO::FETCH_ASSOC);
+                if ($produto) {
+                    $carrinho[] = $produto;
+                    $produtos[] = $produto['id'];
+                }
+            }
+        }
+
+        return [$carrinho, $produtos];
     }
 }
